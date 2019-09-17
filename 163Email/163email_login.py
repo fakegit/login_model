@@ -1,7 +1,9 @@
 # -*- coding: UTF-8 -*-
-# author: 许智海
-# datetime:2019/6/12 18:08
-# software: PyCharm
+# @Time    : 2019/7/5 13:42
+# @Author  : Esbiya
+# @Email   : 18829040039@163.com
+# @File    : login.py
+# @Software: PyCharm
 
 import execjs
 import requests
