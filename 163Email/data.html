@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<object>
+    <array name="items">
+        <object>
+            <string name="func">mbox:getAllFolders</string>
+            <object name="var">
+                <boolean name="stats">true</boolean>
+                <boolean name="threads">false</boolean>
+            </object>
+        </object>
+        <object>
+            <string name="func">mbox:getFolderStats</string>
+            <object name="var">
+                <array name="ids">
+                    <string>1,3,18</string>
+                </array>
+                <boolean name="messages">true</boolean>
+                <boolean name="threads">false</boolean>
+            </object>
+        </object>
+        <object>
+            <string name="func">mbox:listTags</string>
+            <object name="var">
+                <boolean name="stats">true</boolean>
+                <boolean name="threads">false</boolean>
+            </object>
+        </object>
+        <object>
+            <string name="func">mbox:statMessages</string>
+            <object name="var">
+                <array name="fids">
+                    <int>1</int>
+                    <int>2</int>
+                    <int>3</int>
+                    <int>4</int>
+                    <int>18</int>
+                    <int>5</int>
+                </array>
+                <object name="filter">
+                    <string name="defer">19700101:</string>
+                </object>
+            </object>
+        </object>
+        <object>
+            <string name="func">mbox:statMessages</string>
+            <object name="var">
+                <array name="fids">
+                    <int>1</int>
+                    <int>2</int>
+                    <int>3</int>
+                    <int>4</int>
+                    <int>18</int>
+                    <int>5</int>
+                </array>
+                <object name="filter">
+                    <string name="defer">:20190804</string>
+                </object>
+            </object>
+        </object>
+    </array>
+</object>
+<?xml version="1.0"?>
+<object>
+    <int name="fid">1</int>
+    <string name="order">date</string>
+    <boolean name="desc">true</boolean>
+    <int name="limit">20</int>
+    <int name="start">20</int>
+    <boolean name="skipLockedFolders">false</boolean>
+    <string name="topFlag">top</string>
+    <boolean name="returnTag">true</boolean>
+    <boolean name="returnTotal">true</boolean>
+</object>
+<?xml version="1.0"?>
+<object>
+    <string name="id">466:xtbB0hcC+lUMQpHW8AAAsR</string>
+    <boolean name="header">true</boolean>
+    <boolean name="returnImageInfo">true</boolean>
+    <boolean name="returnAntispamInfo">true</boolean>
+    <boolean name="autoName">true</boolean>
+    <object name="returnHeaders">
+        <string name="Resent-From">A</string>
+        <string name="Sender">A</string>
+        <string name="List-Unsubscribe">A</string>
+        <string name="Reply-To">A</string>
+    </object>
+    <boolean name="supportTNEF">true</boolean>
+</object>
