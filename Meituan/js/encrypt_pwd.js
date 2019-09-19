@@ -1,28 +1,26 @@
-navigator = {
-    // WT-JS_DEBUG v1.7.5 - NLiger2018
-    appCodeName: "Mozilla",
-    appMinorVersion: "0",
-    appName: "Netscape",
-    appVersion: "5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; InfoPath.3; rv:11.0) like Gecko",
-    browserLanguage: "zh-CN",
-    cookieEnabled: true,
-    cpuClass: "x86",
-    language: "zh-CN",
-    maxTouchPoints: 0,
-    msManipulationViewsEnabled: true,
-    msMaxTouchPoints: 0,
-    msPointerEnabled: true,
-    onLine: true,
-    platform: "Win32",
-    pointerEnabled: true,
-    product: "Gecko",
-    systemLanguage: "zh-CN",
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; .NET4.0C; .NET4.0E; .NET CLR 2.0.50727; .NET CLR 3.0.30729; .NET CLR 3.5.30729; InfoPath.3; rv:11.0) like Gecko",
-    userLanguage: "zh-CN",
-    vendor: "",
-    vendorSub: "",
-    webdriver: false
-}, window = this, window.navigator = navigator;
+var navigator = {};
+
+var document = {
+    documentElement: {
+        clientWidth: 800,
+        clientHeight: 600
+    },
+    referrer: "http://e.waimai.meituan.com/?defaultLogonType=1&epassport_addr=https://epassport.meituan.com"
+};
+// "https://epassport.meituan.com/api/account/login?loginContinue=http://e.waimai.meituan.com/v2/epassport/entry&&only_auth=undefined"
+
+var window = {
+    innerWidth: 1920,
+    innerHeight: 1080,
+    location: {
+        href: 'http://e.waimai.meituan.com/logon/error/1001'
+    }
+};
+
+var screen = {
+    width: 1920,
+    height: 1080
+};
 
 function e(t) {
     return I.charAt(t)
