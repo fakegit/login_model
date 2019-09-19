@@ -47,8 +47,7 @@ class WangyiyunLogin:
 
     def get_wm_did(self):
         """
-        获取 WM_DID, js生成认证 checkToken 所需的一个参数, 未找到 js 生成函数, 所以直接用浏览器获取了...
-        有效期是一天左右, 过期重新获取, 并保存到本地 txt 文件中, 避免每次登录都要重新调用浏览器获取
+        获取 WM_DID
         :return:
         """
         options = webdriver.ChromeOptions()
@@ -128,14 +127,14 @@ class WangyiyunLogin:
         :return:
         """
         # iv: 偏移量
-        iv = '0102030405060708'
+        iv = b'0102030405060708'
         # 注：AES只能加密数字和字母，无法加密中文。
         # 解决方法：在CBC加密模式下，字符串必须补齐长度为16的倍数，且长度指标不能为中文，需转化为unicode编码长度
         pad = 16 - len(text.encode()) % 16
         text = text + pad * chr(pad)
-        encryptor = AES.new(key, AES.MODE_CBC, iv)
+        encryptor = AES.new(key.encode('utf-8'), AES.MODE_CBC, iv)
         # 最后还需要进行base64加密
-        msg = base64.b64encode(encryptor.encrypt(text))
+        msg = base64.b64encode(encryptor.encrypt(text.encode('utf-8')))
         return msg
 
     @staticmethod
@@ -220,3 +219,4 @@ class WangyiyunLogin:
 
 if __name__ == '__main__':
     WangyiyunLogin().run(load_cookies=False)
+
