@@ -7,7 +7,6 @@ var document = {
     },
     referrer: "http://e.waimai.meituan.com/?defaultLogonType=1&epassport_addr=https://epassport.meituan.com"
 };
-// "https://epassport.meituan.com/api/account/login?loginContinue=http://e.waimai.meituan.com/v2/epassport/entry&&only_auth=undefined"
 
 var window = {
     innerWidth: 1920,
