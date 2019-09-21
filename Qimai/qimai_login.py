@@ -79,7 +79,7 @@ class QimaiLogin:
         res = self.session.post(login_api, data=data)
         cookies = res.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif res.json()['msg'] == '用户名或密码错误':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -102,11 +102,12 @@ class QimaiLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login(login_api)
+        return self.login(login_api)
 
 
 if __name__ == '__main__':
-    QimaiLogin().run(load_cookies=False)
+    x = QimaiLogin().run(load_cookies=False)
+    print(x)

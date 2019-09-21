@@ -76,7 +76,7 @@ class OpenlawLogin:
             nickname = bsobj.select('.bbp-breadcrumb-root')[0].get_text()
             self.logger.info('Hello, {}! '.format(nickname))
             self.redis_client.save_cookies(self.site, self.username, cookies)
-            return True
+            return cookies
         elif '用户名或密码错误' in res.text:
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -89,11 +89,12 @@ class OpenlawLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    OpenlawLogin().run()
+    x = OpenlawLogin().run()
+    print(x)

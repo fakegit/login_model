@@ -100,21 +100,32 @@ def seleniumLoopUnlessSeccessOrMaxTry(max_times, sleep_time=1):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
-            cnt = 1
+            err_cnt = 1
+            reset_cnt = 1
             while True:
                 try:
                     return func(self, *args, **kwargs)
                 except Exception as e:
-                    self.logger.error(u'在执行函数{}时出错 {}'.format(func.__name__, e))
-                    # traceback.print_exc()
+                    if self.reset_flag:
+                        if reset_cnt >= max_times:
+                            self.logger.error('密码错误次数过多, 请确认密码后重新登录! ')
+                            break
+                        self.logger.warning('账号或密码错误, 你还有{}次机会! '.format(max_times - reset_cnt))
+                        self.username = input('账号 >> \n')
+                        self.password = input('密码 >> \n')
+                        reset_cnt += 1
+                        self.reset_flag = False
+                        continue
+                    else:
+                        self.logger.warning('在执行函数: {} 时出错 -> {}'.format(func.__name__, e))
                     self.browser.execute_script('window.stop()')
                     time.sleep(1)
                     self.browser.refresh()
                     time.sleep(sleep_time)
-                if cnt >= max_times:
+                if err_cnt >= max_times:
                     self.logger.error(u'出错次数过多，该函数{}已跳过执行'.format(func.__name__))
                     break
-                cnt += 1
+                err_cnt += 1
 
         return wrapper
 

@@ -141,12 +141,11 @@ class MeituanLogin:
         result = self.session.post(url, data=data).json()
         if result['status']:
             self.logger.info('成功通过滑块验证!')
-            if code == 101157:
+            if code == 121060:
                 return code
             elif code == 101190:
                 return result['data']['response_code']
             else:
-                print(result)
                 raise Exception('未知类型请求! ')
         raise Exception('滑块验证失败! ')
 
@@ -207,7 +206,6 @@ class MeituanLogin:
             msg = resp['error']['message']
             self.logger.warning(msg)
             code = resp['error']['code']
-            print(code)
             request_code = resp['error']['request_code']
             success = self._slider_verify(code, request_code)
             if success:
@@ -291,7 +289,7 @@ class MeituanLogin:
 
         return result
 
-    @loopUnlessSeccessOrMaxTry(3, sleep_time=0.5)
+    @loopUnlessSeccessOrMaxTry(3, sleep_time=3)
     def login_process(self):
         """
         整体登录流程
@@ -308,7 +306,7 @@ class MeituanLogin:
             if self.check_islogin(cookies):
                 self.logger.info('Cookies 有效! ')
                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                return True
+                return cookies
             else:
                 raise Exception('登录失败! ')
         else:
@@ -327,7 +325,7 @@ class MeituanLogin:
                     if self.check_islogin(cookies):
                         self.logger.info('Cookies 有效! ')
                         self.redis_client.save_cookies(self.site, self.username, cookies)
-                        return True
+                        return cookies
                     else:
                         raise Exception('登录失败! ')
                 else:
@@ -345,7 +343,7 @@ class MeituanLogin:
                             if self.check_islogin(cookies):
                                 self.logger.info('Cookies 有效! ')
                                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                                return True
+                                return cookies
                             else:
                                 raise Exception('Cookies 失效! ')
                         else:
@@ -353,7 +351,7 @@ class MeituanLogin:
                     elif result['error']['code'] == 101135:
                         msg = result['error']['message']
                         self.logger.warning(msg)
-                        return False
+                        return None
                     else:
                         raise Exception('登录失败: ', result['error']['message'])
             elif result['error']['code'] == 101157:
@@ -370,7 +368,7 @@ class MeituanLogin:
                     if self.check_islogin(cookies):
                         self.logger.info('Cookies 有效! ')
                         self.redis_client.save_cookies(self.site, self.username, cookies)
-                        return True
+                        return cookies
                     else:
                         raise Exception('Cookies 失效! ')
                 else:
@@ -378,9 +376,8 @@ class MeituanLogin:
             elif result['error']['code'] == 101135:
                 msg = result['error']['message']
                 self.logger.warning(msg)
-                return False
-            else:
-                raise Exception('登录失败: ', result['error']['message'])
+                return None
+            raise Exception('登录失败: ', result['error']['message'])
 
     @check_user()
     def run(self, load_cookies: bool = True):
@@ -389,11 +386,12 @@ class MeituanLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login_process()
+        return self.login_process()
 
 
 if __name__ == '__main__':
-    MeituanLogin('16533101673', 'xuzhihai0723').run(load_cookies=False)
+    x = MeituanLogin().run(load_cookies=False)
+    print(x)

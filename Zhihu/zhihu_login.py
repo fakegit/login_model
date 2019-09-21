@@ -186,7 +186,7 @@ class ZhihuLogin:
         resp = self.session.post(login_api, data=data, headers=headers)
         cookies = resp.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif resp.json()['error']['message'] == '帐号或密码错误' or resp.json()['error']['message'] == '密码长度不足':
             self.reset_flag = True
             raise Exception('帐号或密码错误! ')
@@ -200,11 +200,12 @@ class ZhihuLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    ZhihuLogin().run(load_cookies=True)
+    x = ZhihuLogin().run(load_cookies=False)
+    print(x)

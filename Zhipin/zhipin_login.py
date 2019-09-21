@@ -107,6 +107,7 @@ class ZhipinLogin:
                     cookies = await page.cookies()
                     # cookies = {item['name']: item['value'] for item in cookies}
                     self.redis_client.save_cookies(self.site, self.username, cookies)
+                    return cookies
         else:
             self.logger.error('验证失败! ')
 
@@ -160,12 +161,13 @@ class ZhipinLogin:
             cookies = {item['name']: item['value'] for item in cookies}
             if cookies:
                 if await self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('cookies 已过期! ')
 
-        await self.login()
+        return await self.login()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(ZhipinLogin().run(load_cookies=True))
+    x = loop.run_until_complete(ZhipinLogin().run(load_cookies=True))
+    print(x)

@@ -99,7 +99,7 @@ class KankanLogin:
             nickname = cookies['usernick']
             self.logger.info('Hello, {}! '.format(nickname))
             self.redis_client.save_cookies(self.site, self.username, cookies)
-            return True
+            return cookies
         elif cookies['blogresult'] == '4':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -112,11 +112,12 @@ class KankanLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('cookies已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    KankanLogin().run()
+    x = KankanLogin().run(load_cookies=False)
+    print(x)

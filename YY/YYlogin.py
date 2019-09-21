@@ -30,7 +30,8 @@ class YYlogin:
         self.reset_flag = False
 
     def check_islogin(self, cookies):
-        url = 'http://www.yy.com/yyweb/user/queryUserInfo.json??callback=jQuery1111045940186663574223_{}'.format(int(time.time() * 1000))
+        url = 'http://www.yy.com/yyweb/user/queryUserInfo.json??callback=jQuery1111045940186663574223_{}'.format(
+            int(time.time() * 1000))
         res = self.session.get(url, cookies=cookies).json()
         if res['resultCode'] == 0:
             self.logger.info('Cookies 有效! ')
@@ -105,7 +106,11 @@ class YYlogin:
 
         if res['code'] == '0':
             callback_url = res['obj']['callbackURL']
-            r_cookies = {"_pwcWyy":"066696ef76ca2f85","cookieDate":"1564841513462","hd_newui":"0.970057832001334","hdjs_session_id":"0.5300241632973548","hdjs_session_time":"1564842336414","hiido_ui":"0.7355867355495954","Hm_lpvt_c493393610cdccbddc1f124d567e36ab":"1564842337","Hm_lvt_c493393610cdccbddc1f124d567e36ab":"1564841491,1564841511,1564842337","udboauthtmptoken":"undefined","udboauthtmptokensec":ttokensec}
+            r_cookies = {"_pwcWyy": "066696ef76ca2f85", "cookieDate": "1564841513462", "hd_newui": "0.970057832001334",
+                         "hdjs_session_id": "0.5300241632973548", "hdjs_session_time": "1564842336414",
+                         "hiido_ui": "0.7355867355495954", "Hm_lpvt_c493393610cdccbddc1f124d567e36ab": "1564842337",
+                         "Hm_lvt_c493393610cdccbddc1f124d567e36ab": "1564841491,1564841511,1564842337",
+                         "udboauthtmptoken": "undefined", "udboauthtmptokensec": ttokensec}
             resp = self.session.get(callback_url, cookies=r_cookies)
 
             if 'loginSuccess' in resp.text:
@@ -115,7 +120,7 @@ class YYlogin:
                     self.logger.info('登录成功！')
                     cookies = response.cookies.get_dict()
                     self.redis_client.save_cookies(self.site, self.username, cookies)
-                    return True
+                    return cookies
             raise Exception('登录失败! ')
         elif res['code'] == '1000010':
             self.reset_flag = True
@@ -126,7 +131,7 @@ class YYlogin:
             self._get_captcha(captcha_id)
         elif res['code'] == '1000003':
             self.logger.warning(res['msg'])
-            return False
+            return None
         raise Exception('登录失败! ')
 
     @check_user()
@@ -135,13 +140,12 @@ class YYlogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    YYlogin().run(load_cookies=True)
-
-
+    x = YYlogin().run(load_cookies=True)
+    print(x)

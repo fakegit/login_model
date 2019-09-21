@@ -27,7 +27,7 @@ class Email163Login:
         self.session.headers = {
             'Content-Type': 'application/json',
             'Origin': 'https://dl.reg.163.com',
-            'Referer': 'https://dl.reg.163.com/webzj/v1.0.1/pub/index_dl2_new.html?cd=https%3A%2F%2Fmimg.127.net%2Fp%2Ffreemail%2Findex%2Funified%2Fstatic%2F2019%2Fcss%2F&cf=urs.163.bc0e7491.css&MGID=1561887066637.6414&wdaId=&pkid=CvViHzl&product=mail163',
+            'Referer': 'https://mail.163.com/',
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36',
         }
         with open('encryptEnvinfo.js', 'r') as f:
@@ -51,9 +51,11 @@ class Email163Login:
 
         if '收件箱' in resp.text:
             self.logger.info('Cookies 有效! ')
-
-            nickname = re.search("'true_name':'(.*?)'", resp.text).group(1)
-            self.logger.info('Hello, {}! '.format(nickname))
+            try:
+                nickname = re.search("'true_name':'(.*?)'", resp.text).group(1)
+                self.logger.info('Hello, {}! '.format(nickname))
+            except:
+                self.logger.info('你还没有设置昵称, 快去设置吧! ')
             return True
         return False
 
@@ -178,6 +180,10 @@ class Email163Login:
         self.session.get(url, params=params)
 
     def _get_token(self):
+        """
+        获取页面 token
+        :return:
+        """
         url = 'https://dl.reg.163.com/gt?'
 
         params = {
@@ -190,8 +196,8 @@ class Email163Login:
             'nocache': int(time.time() * 1000)
         }
 
-        res = self.session.get(url, params=params).json()
-        token = res['tk']
+        result = self.session.get(url, params=params).json()
+        token = result['tk']
         return token
 
     def _encrypt_pwd(self):
@@ -224,9 +230,8 @@ class Email163Login:
             "rtid": self.rtid
         }
 
-        self.session.headers.update({'Cookie': 'JSESSIONID-WYTXZDL=YuenayJO3PfX%2BYyPmO%2Fhr%2FLeuu67nXDZPl50EOxAi9plAsq%5CKwf%5CZtQUUxOLA%2FxMlf%2FfxzPNLbTGxZaHUPTny%2BehaVqiukV7ed%2Fblp101N%2BGIIGYKZ9ODzLdR5w5eK%5ChGHO%2FFs2z4umi4Wj2xDzvxbm%2F8lTJBlIU6b9bF0FJrdn1%2Be%2Fq%3A1565361595090; l_s_mail163CvViHzl=2BDA1093FDDA9283AD02B57FFFEC7E0E75F576DC05D86CE6F6B6F9518A920CC1446CE99EF410B468FEDA27F8B53F2F93244D4991F985FACFD8D854C5298024A35F4A702F5D8A93285EB127782B2C254290B1202774ECFD0CE880601326AA4B229FF48A285C3118029255EAE3F260AA5A'})
+        self.session.headers.update({'Cookie': 'JSESSIONID-WYTXZDL=g1JHfvz6wsLNeHAdyUtE0FRiruebrGhpnsGt%5CTZs%5CPAAfGmXG5hGzE3eEu0QDmcqGQKf87EVpesHEvrEGPWeWs4u%2FAgfTWKfoTE3GpnbrQtrto1LU0B2f9tlUNun7en3J7p1PFX6ddMsK%2Bh0LlsLVf5MAN6qTzfWGo5jB6tm5KnpbBdo%3A1569055359975; l_s_mail163CvViHzl=2BDA1093FDDA9283AD02B57FFFEC7E0EF7CE8F4A6E2DA32BBA32CC50C8A54E5BB98676C37C29B6F138D45F2B1D5510896F1359E92D0A78847C03BEBD800E91DCC6880B78017150B4FBBD720B8AE3FE99EE370B654693348BE2A23B1B22020FC24086B6B03057ED5D1AD40CEA84949569'})
         res = self.session.post(login_api, data=json.dumps(data)).json()
-
         if res['ret'] == '201':
             form_data = {
                 "style": "-1", "df": "mail163_letter", "allssl": "true", "net": "", "language": "-1",
@@ -235,19 +240,20 @@ class Email163Login:
                 "product": "mail163"
             }
 
-            cookies = 'NTES_SESS=' + self.session.cookies.get_dict()['NTES_SESS']
+            cookies = 'df=mail163_letter; NTES_SESS=' + self.session.cookies.get_dict()['NTES_SESS']
+            # cookies = '; '.join([key + '=' + value for key, value in self.session.cookies.get_dict().items()])
             self.session.headers.update({'Cookie': cookies})
             resp = self.session.post('https://mail.163.com/entry/cgi/ntesdoor?', data=form_data, allow_redirects=False)
-            redirect_url = resp.headers['location']
+            redirect_url = resp.headers['location'].replace('unknow', 'mail163_letter')
 
             if 'sid' in redirect_url:
                 self.logger.info('登录成功! ')
                 response = self.session.get(redirect_url)
 
-                # 网易邮箱的关键是这个sid, 是session id 的意思, 有了它就可以爬邮箱了, 当然还要有配套的 Cookie
+                # 网易邮箱的关键是这个sid, 是 session id 的意思, 有了它就可以爬邮箱了, 当然还要有配套的 Cookie
                 cookies_item = {
                     'cookies': resp.cookies.get_dict(),
-                    'sid': response.cookies.get_dict()['Coremail.sid']
+                    'sid': redirect_url.split('?')[1].split('&')[0].split('=')[1]
                 }
                 self.redis_client.save_cookies(self.site, self.username, cookies_item)
                 try:
@@ -255,20 +261,20 @@ class Email163Login:
                     self.logger.info('Hello, {}! '.format(nickname))
                 except:
                     self.logger.info('你还没有设置昵称, 快去设置...')
-                return True
+                return cookies_item
             raise Exception('登录失败! ')
         elif res['ret'] == '413':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
         elif res['ret'] == '445':
             self.logger.warning('验证码校验...')
-            return False
+            return None
         elif res['ret'] == '409':
             self.logger.warning('登录过于频繁, 请稍后再试! ')
-            return False
+            return None
         elif res['ret'] == '423':
             self.logger.warning('风控账号! ')
-            return False
+            return None
         raise Exception('登录失败! ')
 
     @check_user()
@@ -283,11 +289,12 @@ class Email163Login:
                     read_flag = input('是否需要查看邮箱? (yes/任意键退出) >> \n')
                     if read_flag == 'yes':
                         self._read_email(cookies)
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    Email163Login().run(load_cookies=True)
+    x = Email163Login().run(load_cookies=False)
+    print(x)

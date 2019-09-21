@@ -153,7 +153,7 @@ class RenrenLogin:
             bsobj = BeautifulSoup(response.text, 'lxml')
             nickname = bsobj.select('.hd-name')[0].get_text()
             self.logger.info('Hello, {}! '.format(nickname))
-            return True
+            return cookies
         elif res.json()['failCode'] == 128:
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -172,11 +172,12 @@ class RenrenLogin:
 
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期! ')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    RenrenLogin().run(load_cookies=False)
+    x = RenrenLogin().run(load_cookies=False)
+    print(x)

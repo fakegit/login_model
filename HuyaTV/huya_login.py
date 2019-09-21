@@ -74,7 +74,7 @@ class HuyaLogin:
         self.session.headers.update({
             'context': context,
             'reqid': str(request_id),
-            'Referer': 'https://udblgn.huya.com/web/middle/2.3/854732/https/787b6ffa5e4c42a99091ab91d071ed2a'
+            'Referer': 'https://udblgn.huya.com/web/middle/2.3/854732/https/{}'.format(context.split('-')[1])
         })
         payload = {
             'appId': "5002",
@@ -84,7 +84,7 @@ class HuyaLogin:
                 'userName': "17570759427",
                 'password': password,
                 'domainList': "",
-                'behavior': "%5B%7B%22page.login%22%3A%220.46%22%7D%2C%7B%22input.l.account%22%3A%225.794%22%7D%2C%7B%22input.l.passwd%22%3A%229.798%22%7D%5D",
+                'behavior': "%5B%7B%22page.login%22%3A%220.073%22%7D%2C%7B%22input.l.account%22%3A%222.856%22%7D%2C%7B%22input.l.passwd%22%3A%225.37%22%7D%2C%7B%22button.UDBSdkLogin%22%3A%228.387%2C138%2C254%22%7D%5D",
                 'page': page,
                 'randomStr': "",
                 'remember': "1"
@@ -94,13 +94,13 @@ class HuyaLogin:
             'sdid': str(sdid),
             'smid': "",
             'uri': "30001",
-            'version': "2.3"
+            'version': "2.4"
         }
         url = 'https://udblgn.huya.com/web/v2/passwordLogin'
         res = self.session.post(url, data=json.dumps(payload))
         cookies = res.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif res.json()['description'] == '账号或密码错误':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -113,11 +113,12 @@ class HuyaLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    HuyaLogin().run(load_cookies=False)
+    x = HuyaLogin().run(load_cookies=False)
+    print(x)

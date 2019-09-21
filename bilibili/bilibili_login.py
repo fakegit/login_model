@@ -187,12 +187,13 @@ class BiliBiliLogin:
             cookies = {item['name']: item['value'] for item in cookies}
             self.redis_client.save_cookies(self.site, self.username, cookies)
             self.browser.close()
-            return True
+            return cookies
         elif self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "canvas.geetest_canvas_slice"))):
             raise Exception('滑动验证失败! ')
         elif self.browser.find_element_by_xpath('//p[@class="tips"]'):
             self.logger.error('校验完成, 登录失败: {}! '.format(self.browser.find_element_by_xpath('//p[@class="tips"]').text))
             return False
+        return None
 
     @check_user()
     def run(self, load_cookies: bool = True):
@@ -200,7 +201,7 @@ class BiliBiliLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
         options = webdriver.ChromeOptions()
@@ -209,9 +210,11 @@ class BiliBiliLogin:
         options.add_argument('--headless')
         self.browser = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.browser, 20)
-        self.login()
+        cookies = self.login()
         self.logger.info('程序结束！')
+        return cookies
 
 
 if __name__ == '__main__':
-    BiliBiliLogin().run(load_cookies=False)
+    x = BiliBiliLogin().run(load_cookies=False)
+    print(x)

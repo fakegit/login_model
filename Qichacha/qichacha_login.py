@@ -110,6 +110,7 @@ class QichachaLogin:
                     cookies = await page.cookies()
                     # print({item['name']: item['value'] for item in cookies})
                     self.redis_client.save_cookies(self.site, self.username, cookies)
+                    return cookies
         else:
             self.logger.warning('验证失败! ')
 
@@ -163,12 +164,13 @@ class QichachaLogin:
             cookies = {cookie['name']: cookie['value'] for cookie in cookies}
             if cookies:
                 if await self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('cookies 已过期! ')
 
-        await self.login()
+        return await self.login()
 
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(QichachaLogin().run(load_cookies=False))
+    x = loop.run_until_complete(QichachaLogin().run(load_cookies=False))
+    print(x)

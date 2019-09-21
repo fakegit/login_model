@@ -63,7 +63,7 @@ class ShixiSengLogin:
         result = json.loads(res.text)
         cookies = res.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif result['msg'] == '密码不对' or '密码不正确':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -76,11 +76,12 @@ class ShixiSengLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    ShixiSengLogin().run(load_cookies=False)
+    x = ShixiSengLogin().run(load_cookies=False)
+    print(x)

@@ -44,7 +44,6 @@ class WeiboLogin:
             nickname = bsobj.find('p', {'class': 'me_name'}).get_text()
             self.logger.info('Cookies 有效! ')
             self.logger.info(f'Hello, {nickname}! ')
-            self.redis_client.save_cookies(self.site, self.username, cookies)
             return True
         elif '立即登录' in res.text:
             return False
@@ -157,7 +156,8 @@ class WeiboLogin:
         res = self.session.post(login_api, data=data)
         cookies = res.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            self.redis_client.save_cookies(self.site, self.username, cookies)
+            return cookies
         elif res.json()['reason'] == '登录名或密码错误' or res.json()['reason'] == '请输入正确的密码':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -173,11 +173,12 @@ class WeiboLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期! ')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    WeiboLogin().run(load_cookies=False)
+    x = WeiboLogin().run(load_cookies=False)
+    print(x)

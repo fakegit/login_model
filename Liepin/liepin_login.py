@@ -108,7 +108,7 @@ class LiepinLogin:
         cookies = res.cookies.get_dict()
         result = json.loads(re.search(f'{params["callback"]}\((.*)\)', res.text).group(1))
         if self.check_islogin(cookies):
-            return True
+            return cookies
         if '密码错误' in res.text:
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -121,11 +121,12 @@ class LiepinLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    LiepinLogin().run(load_cookies=True)
+    x = LiepinLogin().run(load_cookies=True)
+    print(x)

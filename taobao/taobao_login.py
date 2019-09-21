@@ -144,6 +144,7 @@ class TaobaoLogin:
                     cookies = await page.cookies()
                     # print({item['name']: item['value'] for item in cookies})
                     self.redis_client.save_cookies(self.site, self.username, cookies)
+                    return cookies
         await self.page_close(browser)
 
     async def page_evaluate(self, page):
@@ -209,11 +210,11 @@ class TaobaoLogin:
                     await page.setCookie(cookie)
                 if await self.check_islogin(page):
                     await self.page_close(browser)
-                    return True
+                    return cookies
                 await self.page_close(browser)
                 self.logger.warning('cookies 已过期! ')
 
-        await self.login()
+        return await self.login()
 
 
 if __name__ == '__main__':

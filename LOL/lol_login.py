@@ -145,14 +145,14 @@ class LOLLogin:
                 self.logger.info('Hello, {}! '.format(nickname))
                 cookies = resp.cookies.get_dict()
                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                return True
+                return cookies
             raise Exception('登录失败! ')
         elif '密码不正确' in result[-2]:
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
         elif '二维码登录' in res.text:
             self.logger.warning('为了更好的保护您的QQ，请使用扫描二维码登录! ')
-            return False
+            return None
         raise Exception('登录失败: {} '.format(result[-2]))
 
     @check_user()
@@ -162,11 +162,12 @@ class LOLLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
         self.login()
 
 
 if __name__ == '__main__':
-    LOLLogin().run(load_cookies=True)
+    x = LOLLogin().run(load_cookies=True)
+    print(x)

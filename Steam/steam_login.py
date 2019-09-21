@@ -101,16 +101,17 @@ class SteamLogin:
                 self.logger.info('登录成功! ')
                 cookies = self.session.cookies.get_dict()
                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                return True
+                return cookies
             raise Exception('登录失败! ')
         else:
             if res['captcha_needed']:
                 self.logger.info('此次登录需要验证码! ')
-                return False
+                return None
             elif res['message'] == '您输入的帐户名称或密码错误。' or \
                     res['message'] == 'The account name or password that you have entered is incorrect.':
                 self.reset_flag = True
                 raise Exception('账号或密码错误! ')
+            raise Exception('登录失败! ')
 
     @check_user()
     def run(self, load_cookies: bool = True):
@@ -123,11 +124,12 @@ class SteamLogin:
 
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期! ')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    SteamLogin().run(load_cookies=True)
+    x = SteamLogin().run(load_cookies=True)
+    print(x)

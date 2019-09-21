@@ -230,7 +230,7 @@ class BaiduLogin:
                 self.logger.info('登录成功! ')
                 cookies = resp.cookies.get_dict()
                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                return True
+                return cookies
             elif result['err_no'] in {'6', '257'}:
                 code_str = result.get('codeString')
                 self.logger.warning('请输入验证码! ')
@@ -244,10 +244,11 @@ class BaiduLogin:
                 loginproxy = result['loginproxy']
                 flag = self._verify_phone(authtoken, lstr, ltoken, loginproxy)
                 if not flag:
-                    return
+                    return None
             elif result['err_no'] in {'4', '7'}:
                 self.reset_flag = True
                 raise Exception('账号或密码错误! ')
+            return None
 
     @check_user()
     def run(self, load_cookies: bool = True):
@@ -255,11 +256,12 @@ class BaiduLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    BaiduLogin().run()
+    x = BaiduLogin().run()
+    print(x)

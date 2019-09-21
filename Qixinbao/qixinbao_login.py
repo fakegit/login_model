@@ -70,7 +70,7 @@ class QixinbaoLogin:
         resp = requests.get(url, headers=headers)
         codes = {}
         for i in range(20):
-            text = 'e\.default={' + str(i) + ':"(.*?)"}'
+            text = r'e\.default={' + str(i) + ':"(.*?)"}'
             x = re.search(text, resp.text).group(1)
             codes.setdefault(i, x)
         return codes
@@ -107,7 +107,7 @@ class QixinbaoLogin:
         res = self.session.post(login_api, data=json.dumps(data))
         cookies = self.session.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif '用户名或密码错误' in res.text:
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -120,11 +120,12 @@ class QixinbaoLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    QixinbaoLogin('17570759427', 'xuzhihai0723').run(load_cookies=False)
+    x = QixinbaoLogin().run(load_cookies=False)
+    print(x)

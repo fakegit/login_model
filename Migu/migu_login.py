@@ -120,8 +120,9 @@ class MiguLogin:
             res = self.session.get('http://music.migu.cn/v3/user/login?', params=params)
             cookies = res.cookies.get_dict()
             if self.check_islogin(cookies):
-                return True
-            return False
+                return cookies
+            raise Exception('登录失败! ')
+        raise Exception('认证失效! ')
 
     @check_user()
     def run(self, load_cookies: bool = True):
@@ -130,11 +131,12 @@ class MiguLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    MiguLogin().run(load_cookies=False)
+    x = MiguLogin().run(load_cookies=False)
+    print(x)

@@ -107,7 +107,7 @@ class IQiyiLogin:
                 self.logger.info('登录成功! ')
                 self.logger.info('Hello, {}! '.format(res.json()['data']['nickname']))
                 self.redis_client.save_cookies(self.site, self.username, cookies)
-                return True
+                return cookies
             elif res.json()['code'] == 'P00117':
                 self.reset_flag = True
                 raise Exception('账号或密码错误! ')
@@ -176,11 +176,12 @@ class IQiyiLogin:
                     info_flag = input('是否显示用户信息? (yes/no) \n')
                     if info_flag == 'yes':
                         self.get_userinfo(cookies)
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    IQiyiLogin().run(load_cookies=False)
+    x = IQiyiLogin().run(load_cookies=False)
+    print(x)

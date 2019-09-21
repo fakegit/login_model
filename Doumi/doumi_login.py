@@ -85,7 +85,7 @@ class DoumiLogin:
         res = self.session.post(login_api, data=data)
         cookies = res.cookies.get_dict()
         if self.check_islogin(cookies):
-            return True
+            return cookies
         elif res.json()['msg'] == '账户或密码有误':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -98,12 +98,13 @@ class DoumiLogin:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('cookies已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    DoumiLogin().run()
+    x = DoumiLogin().run()
+    print(x)
 
