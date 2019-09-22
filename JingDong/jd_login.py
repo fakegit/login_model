@@ -21,14 +21,9 @@ import random
 import numpy as np
 from cookies_pool import RedisClient
 from PIL import Image
-from io import BytesIO
-
-THRESHOLD = 60
-LEFT = 60
-BORDER = 0
 
 
-class BiliBiliLogin:
+class JDLogin:
 
     def __init__(self, username: str = None, password: str = None):
         self.site = 'jingdong'
@@ -288,5 +283,5 @@ class BiliBiliLogin:
 
 
 if __name__ == '__main__':
-    x = BiliBiliLogin('请叫我Jinx啦丶', 'Xuzhihai0723').run(load_cookies=True)
+    x = JDLogin().run(load_cookies=True)
     print(x)
