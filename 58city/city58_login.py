@@ -125,7 +125,7 @@ class City58Login:
             nickname = unquote(cookies['58uname'])
             self.logger.info('Hello, {}! '.format(nickname))
             self.redis_client.save_cookies(self.site, self.username, cookies)
-            return True
+            return cookies
         elif result['msg'] == '该用户名与密码不符' or result['msg'] == '密码格式错误，请重置':
             self.reset_flag = True
             raise Exception('账号或密码错误! ')
@@ -138,11 +138,12 @@ class City58Login:
             cookies = self.redis_client.load_cookies(self.site, self.username)
             if cookies:
                 if self.check_islogin(cookies):
-                    return True
+                    return cookies
                 self.logger.warning('Cookies 已过期')
 
-        self.login()
+        return self.login()
 
 
 if __name__ == '__main__':
-    City58Login().run()
+    x = City58Login().run()
+    print(x)
