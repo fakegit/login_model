@@ -14,7 +14,6 @@ from selenium.webdriver import ActionChains
 from bs4 import BeautifulSoup
 from utils import *
 import requests
-import re
 import cv2
 import base64
 import random
@@ -179,7 +178,7 @@ class JDLogin:
     def login(self):
         """
         打开浏览器,并且输入账号密码
-        :return: None
+        :return:
         """
         self.logger.info('尝试登录...')
         # 打开京东网站
@@ -194,20 +193,20 @@ class JDLogin:
         self.logger.info('输入账号...')
         input_username = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="loginname"]')))
         input_username.send_keys(self.username)
-
         time.sleep(1)
 
         self.logger.info('输入密码...')
         input_password = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="nloginpwd"]')))
         input_password.send_keys(self.password)
-
         time.sleep(1)
 
         self.logger.info('点击登录...')
         button = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="loginsubmit"]')))
         button.click()
+        time.sleep(1)
+
         # 判断是否有滑动页面
-        slider_flag = self.is_element_exists('//*[@id="JDJRV-wrap-loginsubmit"]/DIV/DIV/DIV/DIV[1]/DIV[2]/DIV[1]/IMG')
+        slider_flag = self.is_element_exists('//*[@id="JDJRV-wrap-loginsubmit"]')
         if not slider_flag:
             self.logger.info('未出现滑块验证! ')
             time.sleep(3)
@@ -250,7 +249,7 @@ class JDLogin:
                     raise Exception('账号或密码错误! ')
                 else:
                     self.logger.error(msg_error)
-                    return None
+                    return msg_error
             elif self.is_element_exists('//div[@class="JDJRV-bigimg"]/img'):
                 self.logger.warning('验证失败, 重试! ')
                 time.sleep(0.5)
