@@ -209,7 +209,6 @@ class MeituanLogin:
             request_code = resp['error']['request_code']
             success = self._slider_verify(code, request_code)
             if success:
-                self.logger.info('成功通过滑块验证! ')
                 return True
             return False
         elif resp['status'] == 1:

@@ -24,7 +24,7 @@ from cookies_pool import RedisClient
 
 class ToutiaoLogin:
 
-    def __init__(self, username: str = None, password: str = None):
+    def __init__(self, username: str = None, password: str = None, headless=False):
         self.site = 'toutiao'
         self.logger = get_logger()
         self.username = username
@@ -32,6 +32,7 @@ class ToutiaoLogin:
         self.redis_client = RedisClient(self.logger)
         self.browser = None
         self.wait = None
+        self.headless = headless
 
         # 密码错误重置初始化
         self.reset_flag = False
@@ -53,6 +54,19 @@ class ToutiaoLogin:
             self.logger.info('Hello, {}! '.format(nickname))
             return True
         return False
+
+    def set_browser(self):
+        """
+        配置 selenium
+        :return:
+        """
+        options = webdriver.ChromeOptions()
+        # 设置为开发者模式，避免被识别, 开发者模式下 webdriver 属性为 undefined
+        options.add_experimental_option('excludeSwitches', ['enable-automation'])
+        if self.headless:
+            options.add_argument('--headless')
+        self.browser = webdriver.Chrome(options=options)
+        self.wait = WebDriverWait(self.browser, 20)
 
     @staticmethod
     def pic_download(url, type):
@@ -118,7 +132,7 @@ class ToutiaoLogin:
         # 切割
         imagecrop = image.crop(xy)
         # 保存切割的缺口
-        imagecrop.save("new_image.png")
+        imagecrop.save("new_image.jpg")
         # imagecrop.show()
         return y
 
@@ -173,6 +187,7 @@ class ToutiaoLogin:
         except:
             return False
 
+    @seleniumLoopUnlessSeccessOrMaxTry(3, sleep_time=3)
     def login(self):
         """
         打开浏览器,并且输入账号密码
@@ -201,7 +216,7 @@ class ToutiaoLogin:
         button.click()
         time.sleep(3)
 
-        # 判断是否有滑动页面
+        # 判断是否出现滑块验证
         slider_flag = self.is_element_exists('//*[@id="verify-bar-box"]')
         if not slider_flag:
             self.logger.info('未出现滑块验证! ')
@@ -209,7 +224,7 @@ class ToutiaoLogin:
             error_flag = self.is_element_exists('//div[@class="login-msg"]')
             if error_flag:
                 msg_error = self.browser.find_element_by_xpath('//div[@class="login-msg"]').text
-                if msg_error == '帐号或密码错误':
+                if '帐号或密码错误' in msg_error:
                     self.reset_flag = True
                     raise Exception('账号或密码错误! ')
                 else:
@@ -238,7 +253,7 @@ class ToutiaoLogin:
             if error_flag:
                 self.logger.info('验证通过! ')
                 msg_error = self.browser.find_element_by_xpath('//div[@class="login-msg"]').text
-                if msg_error == '帐号或密码错误':
+                if '帐号或密码错误' in msg_error:
                     self.reset_flag = True
                     raise Exception('账号或密码错误! ')
                 else:
@@ -269,17 +284,12 @@ class ToutiaoLogin:
                     return cookies
                 self.logger.warning('Cookies 已过期')
 
-        options = webdriver.ChromeOptions()
-        # 设置为开发者模式，避免被识别, 开发者模式下 webdriver 属性为 undefined
-        options.add_experimental_option('excludeSwitches', ['enable-automation'])
-        # options.add_argument('--headless')
-        self.browser = webdriver.Chrome(options=options)
-        self.wait = WebDriverWait(self.browser, 20)
+        self.set_browser()
         cookies = self.login()
         self.logger.info('程序结束！')
         return cookies
 
 
 if __name__ == '__main__':
-    x = ToutiaoLogin().run(load_cookies=False)
+    x = ToutiaoLogin('18829040039', 'xuzhihai0723').run(load_cookies=False)
     print(x)
