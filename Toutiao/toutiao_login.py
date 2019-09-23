@@ -18,7 +18,6 @@ import random
 import numpy as np
 from PIL import Image
 from utils import *
-
 from cookies_pool import RedisClient
 
 
