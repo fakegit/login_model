@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/9/21 14:55
+# @Time    : 2019/9/23 20:25
 # @Author  : Esbiya
 # @Email   : 18829040039@163.com
-# @File    : jd_login.py
+# @File    : toutiao_login.py
 # @Software: PyCharm
 
 
@@ -11,21 +11,21 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver import ActionChains
-from bs4 import BeautifulSoup
-from utils import *
 import requests
+import re
 import cv2
-import base64
 import random
 import numpy as np
-from cookies_pool import RedisClient
 from PIL import Image
+from utils import *
+
+from cookies_pool import RedisClient
 
 
-class JDLogin:
+class ToutiaoLogin:
 
     def __init__(self, username: str = None, password: str = None):
-        self.site = 'jingdong'
+        self.site = 'toutiao'
         self.logger = get_logger()
         self.username = username
         self.password = password
@@ -38,88 +38,87 @@ class JDLogin:
 
     def check_islogin(self, cookies):
         """
-        检查登录状态, 请求个人主页未跳转至登录页则 cookies 有效
+        检查登录状态, 请求网站首页出现用户名则 cookies 有效
         :param cookies:
         :return:
         """
-        url = 'http://i.jd.com/user/info'
+        url = 'https://www.toutiao.com/'
         headers = {
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'
         }
         resp = requests.get(url, headers=headers, cookies=cookies)
-        if url in resp.url:
-            self.logger.info('Cookies 有效!')
-            bsobj = BeautifulSoup(resp.text, 'lxml')
-            nickname = bsobj.select('#hiddenAliasName')[0]['value']
+        nickname = re.search("userName: '(.*?)',", resp.text).group(1)
+        if nickname != '':
+            self.logger.info('Cookies 有效! ')
             self.logger.info('Hello, {}! '.format(nickname))
             return True
         return False
 
-    def download_img(self, url, type):
+    @staticmethod
+    def pic_download(url, type):
         """
         下载验证码图片
-        :param url: 图片 base64
-        :param type: 类型
+        :param url:
+        :param type:
         :return:
         """
-        img_db_path = os.path.abspath('...') + r'\img_db'
-        if not os.path.exists(img_db_path):
-            os.mkdir(img_db_path)
-        img_path = img_db_path + '\\' + type + '.jpg'
-        try:
-            if os.path.exists(img_path):
-                os.remove(img_path)
-            data = url.split(',')[1]
-            img = base64.b64decode(data)
-            with open(img_path, "wb") as f:
-                f.write(img)
-            return img_path
-        except Exception as e:
-            self.logger.error("验证码图片获取失败! ", e.args)
+        img_data = requests.get(url).content
+        with open('./{}.jpg'.format(type), 'wb') as f:
+            f.write(img_data)
+
+    @staticmethod
+    def process_img(img1, img2):
+        """
+        图片处理
+        :param img1: 处理后图片
+        :param img2: 待处理图片
+        :return:
+        """
+        cv2.imwrite(img1, img2)
+        target = cv2.imread(img1)
+        target = cv2.cvtColor(target, cv2.COLOR_BGR2GRAY)
+        target = abs(255 - target)
+        cv2.imwrite(img1, target)
 
     def get_distance(self, slider_url, captcha_url):
         """
         获取缺口距离
-        :param slider_url: 滑块图片 base64
-        :param captcha_url: 验证码图片 base64
+        :param slider_url: 滑块图片 url
+        :param captcha_url: 验证码图片 url
         :return:
         """
+
         # 引用上面的图片下载
-        slider_path = self.download_img(slider_url, 'slider')
+        self.pic_download(slider_url, 'slider')
 
         time.sleep(2)
 
         # 引用上面的图片下载
-        captcha_path = self.download_img(captcha_url, 'captcha')
+        self.pic_download(captcha_url, 'captcha')
 
         # # 计算拼图还原距离
-        target = cv2.imread(slider_path, 0)
-        template = cv2.imread(captcha_path, 0)
+        target = cv2.imread('slider.jpg', 0)
+        template = cv2.imread('captcha.jpg', 0)
         w, h = target.shape[::-1]
-        # print(w, h)
-        temp = os.path.abspath('...') + r'\img_db' + '\\' + 'temp.jpg'
-        targ = os.path.abspath('...') + r'\img_db' + '\\' + 'targ.jpg'
-        cv2.imwrite(temp, template)
-        cv2.imwrite(targ, target)
-        target = cv2.imread(targ)
-        target = cv2.cvtColor(target, cv2.COLOR_BGR2GRAY)
-        target = abs(255 - target)
-        cv2.imwrite(targ, target)
+        temp = 'temp.jpg'
+        targ = 'targ.jpg'
+        self.process_img(temp, template)
+        self.process_img(targ, target)
         target = cv2.imread(targ)
         template = cv2.imread(temp)
         result = cv2.matchTemplate(target, template, cv2.TM_CCOEFF_NORMED)
         x, y = np.unravel_index(result.argmax(), result.shape)
         # 缺口位置
-        # print((y, x, y + w, x + h))
+        # print((y, x, y + w - 5, x + h - 5))
 
         # 调用PIL Image 做测试
-        image = Image.open(captcha_path)
+        image = Image.open('captcha.jpg')
 
         xy = (y, x, y + w, x + h)
         # 切割
         imagecrop = image.crop(xy)
         # 保存切割的缺口
-        imagecrop.save(os.path.abspath('...') + r'\img_db' + '\\' + "new_image.png")
+        imagecrop.save("new_image.png")
         # imagecrop.show()
         return y
 
@@ -128,13 +127,13 @@ class JDLogin:
         获取滑块
         :return:
         """
-        return self.wait.until(EC.element_to_be_clickable((By.XPATH, '//div[contains(@class, "JDJRV-slide-btn")]')))
+        return self.wait.until(EC.element_to_be_clickable((By.XPATH, '//img[@class="drag-button"]')))
 
     def move_to_gap(self, distance, slider):
         """
         移动滑块至缺口
-        :param distance:
-        :param slider:
+        :param distance: 缺口距离
+        :param slider: 滑块对象
         :return:
         """
         has_gone_dist = 0
@@ -174,7 +173,6 @@ class JDLogin:
         except:
             return False
 
-    @seleniumLoopUnlessSeccessOrMaxTry(3, sleep_time=3)
     def login(self):
         """
         打开浏览器,并且输入账号密码
@@ -182,44 +180,44 @@ class JDLogin:
         """
         self.logger.info('尝试登录...')
         # 打开京东网站
-        self.browser.get('https://passport.jd.com/new/login.aspx')
+        self.browser.get('https://sso.toutiao.com/')
 
         # 点击选择账号密码登录
         self.logger.info('点击选择账号密码登录...')
         acount_login = self.wait.until(
-            EC.presence_of_element_located((By.XPATH, '//div[contains(@class, "login-tab-r")]')))
+            EC.presence_of_element_located((By.XPATH, '//div[@id="login-type-account"]')))
         acount_login.click()
 
         self.logger.info('输入账号...')
-        input_username = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="loginname"]')))
+        input_username = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="user-name"]')))
         input_username.send_keys(self.username)
         time.sleep(1)
 
         self.logger.info('输入密码...')
-        input_password = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="nloginpwd"]')))
+        input_password = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="password"]')))
         input_password.send_keys(self.password)
         time.sleep(1)
 
         self.logger.info('点击登录...')
-        button = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="loginsubmit"]')))
+        button = self.wait.until(EC.presence_of_element_located((By.XPATH, '//*[@id="bytedance-login-submit"]')))
         button.click()
-        time.sleep(1)
+        time.sleep(3)
 
         # 判断是否有滑动页面
-        slider_flag = self.is_element_exists('//*[@id="JDJRV-wrap-loginsubmit"]')
+        slider_flag = self.is_element_exists('//*[@id="verify-bar-box"]')
         if not slider_flag:
             self.logger.info('未出现滑块验证! ')
             time.sleep(3)
-            error_flag = self.is_element_exists('//div[@class="msg-error"]')
+            error_flag = self.is_element_exists('//div[@class="login-msg"]')
             if error_flag:
-                msg_error = self.browser.find_element_by_xpath('//div[@class="msg-error"]').text
-                if msg_error == '账户名与密码不匹配，请重新输入':
+                msg_error = self.browser.find_element_by_xpath('//div[@class="login-msg"]').text
+                if msg_error == '帐号或密码错误':
                     self.reset_flag = True
                     raise Exception('账号或密码错误! ')
                 else:
                     self.logger.error(msg_error)
                     return None
-            elif self.browser.current_url != "https://www.jd.com/":
+            elif self.browser.current_url != "https://www.toutiao.com/":
                 self.logger.error('登录失败! ')
                 return None
             else:
@@ -230,27 +228,25 @@ class JDLogin:
                 return cookies
         self.logger.info('出现滑块验证! ')
         while True:
-            captcha_b64data = self.wait.until(EC.presence_of_element_located(
-                (By.XPATH, '//div[@class="JDJRV-bigimg"]/img'))).get_attribute('src')
-            slider_b64data = self.wait.until(EC.presence_of_element_located(
-                (By.XPATH, '//div[@class="JDJRV-smallimg"]/img'))).get_attribute('src')
-            distance = self.get_distance(slider_b64data, captcha_b64data)
-            # print(distance)
-            # 网页上的尺寸差
-            distance = distance * (279 / 360) + random.uniform(-1, 1)
+            captcha_url = self.wait.until(EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="validate-big"]'))).get_attribute('src')
+            slider_url = self.wait.until(EC.presence_of_element_located(
+                (By.XPATH, '//img[@class="validate-block"]'))).get_attribute('src')
+            distance = self.get_distance(slider_url, captcha_url)
             slider = self.get_slider()
             self.move_to_gap(distance, slider)
             time.sleep(3)
-            error_flag = self.is_element_exists('//div[@class="msg-error"]')
+            error_flag = self.is_element_exists('//div[@class="login-msg"]')
             if error_flag:
-                msg_error = self.browser.find_element_by_xpath('//div[@class="msg-error"]').text
-                if msg_error == '账户名与密码不匹配，请重新输入':
+                self.logger.info('验证通过! ')
+                msg_error = self.browser.find_element_by_xpath('//div[@class="login-msg"]').text
+                if msg_error == '帐号或密码错误':
                     self.reset_flag = True
                     raise Exception('账号或密码错误! ')
                 else:
                     self.logger.error(msg_error)
                     return msg_error
-            elif self.is_element_exists('//div[@class="JDJRV-bigimg"]/img'):
+            elif self.is_element_exists('//*[@id="verify-bar-box"]'):
                 self.logger.warning('验证失败, 重试! ')
                 time.sleep(0.5)
             else:
@@ -287,5 +283,5 @@ class JDLogin:
 
 
 if __name__ == '__main__':
-    x = JDLogin('xxx', 'yyy').run(load_cookies=False)
+    x = ToutiaoLogin('17570759427', 'Xuzhihai0723').run(load_cookies=False)
     print(x)
