@@ -109,7 +109,7 @@ class ToutiaoLogin:
         # 引用上面的图片下载
         self.pic_download(captcha_url, 'captcha')
 
-        # # 计算拼图还原距离
+        # 计算拼图还原距离
         target = cv2.imread('slider.jpg', 0)
         template = cv2.imread('captcha.jpg', 0)
         w, h = target.shape[::-1]
@@ -122,7 +122,7 @@ class ToutiaoLogin:
         result = cv2.matchTemplate(target, template, cv2.TM_CCOEFF_NORMED)
         x, y = np.unravel_index(result.argmax(), result.shape)
         # 缺口位置
-        # print((y, x, y + w - 5, x + h - 5))
+        # print((y, x, y + w, x + h))
 
         # 调用PIL Image 做测试
         image = Image.open('captcha.jpg')
