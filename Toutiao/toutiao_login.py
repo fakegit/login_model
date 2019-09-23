@@ -286,7 +286,7 @@ class ToutiaoLogin:
 
         self.set_browser()
         cookies = self.login()
-        self.logger.info('程序结束！')
+        self.logger.info('程序结束! ')
         return cookies
 
 
