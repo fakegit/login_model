@@ -179,10 +179,8 @@ class ToutiaoLogin:
         :return:
         """
         self.logger.info('尝试登录...')
-        # 打开京东网站
         self.browser.get('https://sso.toutiao.com/')
 
-        # 点击选择账号密码登录
         self.logger.info('点击选择账号密码登录...')
         acount_login = self.wait.until(
             EC.presence_of_element_located((By.XPATH, '//div[@id="login-type-account"]')))
