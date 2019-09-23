@@ -290,5 +290,5 @@ class ToutiaoLogin:
 
 
 if __name__ == '__main__':
-    x = ToutiaoLogin().run(load_cookies=False)
+    x = ToutiaoLogin(headless=True).run(load_cookies=False)
     print(x)
