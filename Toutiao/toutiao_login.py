@@ -283,5 +283,5 @@ class ToutiaoLogin:
 
 
 if __name__ == '__main__':
-    x = ToutiaoLogin('17570759427', 'Xuzhihai0723').run(load_cookies=False)
+    x = ToutiaoLogin().run(load_cookies=False)
     print(x)
