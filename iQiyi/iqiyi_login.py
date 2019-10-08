@@ -72,6 +72,28 @@ class IQiyiLogin:
         code_dict = r['data']['acode']
         return code_dict
 
+    def get_dfp(self):
+        """
+        获取页面初始化参数 dfp
+        :return:
+        """
+        url = 'https://cook.iqiyi.com/security/dfp_pcw/sign'
+
+        data = {
+            'dim': 'eyJqbiI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS83NS4wLjM3NzAuODAgU2FmYXJpLzUzNy4zNiIsImNtIjoiemgtQ04iLCJndSI6MjQsInVmIjoxLCJqciI6WzEzNjYsNzY4XSwiZGkiOlsxMzY2LDcyOF0sInpwIjotNDgwLCJ1aCI6MSwic2giOjEsImhlIjoxLCJ6byI6MSwicnYiOiJ1bmtub3duIiwibngiOiJXaW4zMiIsIml3IjoidW5rbm93biIsInFtIjpbIkNocm9tZSBQREYgUGx1Z2luOjpQb3J0YWJsZSBEb2N1bWVudCBGb3JtYXQ6OmFwcGxpY2F0aW9uL3gtZ29vZ2xlLWNocm9tZS1wZGZ cGRmIiwiQ2hyb21lIFBERiBWaWV3ZXI6Ojo6YXBwbGljYXRpb24vcGRmfnBkZiIsIk5hdGl2ZSBDbGllbnQ6Ojo6YXBwbGljYXRpb24veC1uYWNsfixhcHBsaWNhdGlvbi94LXBuYWNsfiJdLCJ3ciI6ImI3NzY2NGM3MTcwNzdhZmZmMzNhN2QyODM2ZTIzNzdjIiwid2ciOiJlZDI2NTg5MTM1MTJlNTA5MmZlMjE5NDAwOGQ3OWEwZSIsImZrIjpmYWxzZSwicmciOmZhbHNlLCJ4eSI6ZmFsc2UsImptIjpmYWxzZSwiYmEiOmZhbHNlLCJ0bSI6WzAsZmFsc2UsZmFsc2VdLCJhdSI6dHJ1ZSwibWkiOiI5YmU0OTM0MS05MTI2LTg5MjQtNjc2Ni0xOTA3Y2QxNTYxMDgiLCJjbCI6IlBDV0VCIiwic3YiOiIxLjAiLCJqZyI6IjA3NjQ4M2QwODg2NGMzNTE5MWUyNTVjNjhmNWU2YWE3IiwiZmgiOiJvazZxeWc0cXM5YWw5MTA0YjZ0OTJoODEiLCJpZm0iOltmYWxzZSxudWxsLG51bGwsbnVsbF0sImV4IjoiIiwiZHYiOiJvZmYiLCJwdiI6dHJ1ZX0=',
+            'plat': 'PCWEB',
+            'ver': '1.0',
+            'sig': '785042546DC84608E1DF7430A9AE021C2F6F7955',
+            'nifc': 'false'
+        }
+        result = self.session.post(url, data=data).json()
+        if result['code'] == 0:
+            dfp = result['result']['dfp']
+            print('dfp: {}'.format(dfp))
+            print('{} 后过期'.format(result['result']['expireAt'] - int(time.time() * 1000)))
+            return dfp
+        return None
+
     @loopUnlessSeccessOrMaxTry(3, sleep_time=3)
     def login(self):
         """
@@ -82,6 +104,7 @@ class IQiyiLogin:
 
         encrypt_pwd = self._encrypt_pwd()
 
+        dfp = self.get_dfp()
         data = {
             'email': self.username,
             'fromSDK': '1',
@@ -95,9 +118,9 @@ class IQiyiLogin:
             'nr': '1',
             'verifyPhone': '1',
             'area_code': '86',
-            'env_token': 'c225a3e03fdf4c90a9227af2f0abd8bb',
-            'dfp': 'a06e54c2dfe5d24ebf8aec1c2d0a8f5afb2fc70fd2a147f7ab9e5aea7cff440f9e',
-            'envinfo': 'eyJqbiI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdPVzY0OyBydjo2Ny4wKSBHZWNrby8yMDEwMDEwMSBGaXJlZm94LzY3LjAiLCJjbSI6InpoLUNOIiwiZ3UiOjI0LCJ1ZiI6MSwianIiOlsxMzY2LDc2OF0sImRpIjpbMTM2Niw3MjhdLCJ6cCI6LTQ4MCwidWgiOjEsInNoIjoxLCJoZSI6MSwicnYiOiJ1bmtub3duIiwibngiOiJXaW4zMiIsIml3IjoidW5zcGVjaWZpZWQiLCJxbSI6W10sIndyIjoiOWUzYjk5MzFhNzBiMGQwZDI0NGU1ZTg1MTAyZGJiYTAiLCJ3ZyI6IjRlMzVhYWVjZTM2NTU0YTM5MGQwYWU1MDNlZDljOTM0IiwiZmsiOmZhbHNlLCJyZyI6ZmFsc2UsInh5IjpmYWxzZSwiam0iOmZhbHNlLCJiYSI6ZmFsc2UsInRtIjpbMCxmYWxzZSxmYWxzZV0sImF1Ijp0cnVlLCJtaSI6IjQ1MjY1MDUxLWM3MjItNTcyOC00OGY3LWJiMjA3N2NlMGVhMCIsImNsIjoiUENXRUIiLCJzdiI6IjEuMCIsImpnIjoiNTE3YzNiNDk0NzFlMTJiZTc0N2QzYWI3MWY1YTM1OTMiLCJmaCI6ImhydWtvdjY0OW15OGV1YnB4Ym9uMThuayIsImlmbSI6W3RydWUsNDYwLDQyMCwiaHR0cDovL3d3dy5pcWl5aS5jb20vIl0sImV4IjoiIiwicHYiOmZhbHNlfQ=='
+            # 'env_token': 'c225a3e03fdf4c90a9227af2f0abd8bb',
+            'dfp': dfp,
+            'envinfo': 'eyJqbiI6Ik1vemlsbGEvNS4wIChXaW5kb3dzIE5UIDEwLjA7IFdpbjY0OyB4NjQpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGxpa2UgR2Vja28pIENocm9tZS83NS4wLjM3NzAuODAgU2FmYXJpLzUzNy4zNiIsImNtIjoiemgtQ04iLCJndSI6MjQsInVmIjoxLCJqciI6WzEzNjYsNzY4XSwiZGkiOlsxMzY2LDcyOF0sInpwIjotNDgwLCJ1aCI6MSwic2giOjEsImhlIjoxLCJ6byI6MSwicnYiOiJ1bmtub3duIiwibngiOiJXaW4zMiIsIml3IjoidW5rbm93biIsInFtIjpbIkNocm9tZSBQREYgUGx1Z2luOjpQb3J0YWJsZSBEb2N1bWVudCBGb3JtYXQ6OmFwcGxpY2F0aW9uL3gtZ29vZ2xlLWNocm9tZS1wZGZ cGRmIiwiQ2hyb21lIFBERiBWaWV3ZXI6Ojo6YXBwbGljYXRpb24vcGRmfnBkZiIsIk5hdGl2ZSBDbGllbnQ6Ojo6YXBwbGljYXRpb24veC1uYWNsfixhcHBsaWNhdGlvbi94LXBuYWNsfiJdLCJ3ciI6ImI3NzY2NGM3MTcwNzdhZmZmMzNhN2QyODM2ZTIzNzdjIiwid2ciOiJlZDI2NTg5MTM1MTJlNTA5MmZlMjE5NDAwOGQ3OWEwZSIsImZrIjpmYWxzZSwicmciOmZhbHNlLCJ4eSI6ZmFsc2UsImptIjpmYWxzZSwiYmEiOmZhbHNlLCJ0bSI6WzAsZmFsc2UsZmFsc2VdLCJhdSI6dHJ1ZSwibWkiOiI5YmU0OTM0MS05MTI2LTg5MjQtNjc2Ni0xOTA3Y2QxNTYxMDgiLCJjbCI6IlBDV0VCIiwic3YiOiIxLjAiLCJqZyI6IjA3NjQ4M2QwODg2NGMzNTE5MWUyNTVjNjhmNWU2YWE3IiwiZmgiOiJvazZxeWc0cXM5YWw5MTA0YjZ0OTJoODEiLCJpZm0iOltmYWxzZSxudWxsLG51bGwsbnVsbF0sImV4IjoiIiwiZHYiOiJvZmYiLCJwdiI6dHJ1ZX0='
         }
 
         while True:

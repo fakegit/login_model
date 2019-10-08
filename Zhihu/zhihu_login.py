@@ -83,7 +83,7 @@ class ZhihuLogin:
         """
         请求验证码的 API 接口，无论是否需要验证码都需要请求一次
         如果需要验证码会返回图片的 base64 编码
-        根据 lang 参数匹配验证码，需要人工输入
+        根据 lang 参数匹配验证码
         :param lang: 返回验证码的语言(en/cn)
         :return: 验证码的 POST 参数
         """
@@ -153,7 +153,6 @@ class ZhihuLogin:
         """
         模拟登录知乎
         :param captcha_lang: 验证码类型 'en' or 'cn'
-        :param load_cookies: 是否读取上次保存的 Cookies
         :return: bool
         若在 PyCharm 下使用中文验证出现无法点击的问题，
         需要在 Settings / Tools / Python Scientific / Show Plots in Toolwindow，取消勾选
