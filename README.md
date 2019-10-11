@@ -10,7 +10,7 @@
    * 博客园
    * 斗米
    * Github
-   * 虎牙(版本更新, 需要进一步认证)
+   * 虎牙
    * 爱奇艺
    * 京东
    * 迅雷看看
@@ -21,7 +21,7 @@
    * 咪咕音乐
    * 文书网
    * 企查查
-   * 启信宝(需要极验3验证, 对于极验滑块验证可去 CookiesPool 项目查看 API 服务, 直接调用接口即可获取验证通过参数 validate , 极验2、极验3、点选均可用)
+   * 启信宝(需要极验3验证)
    * 人人网
    * 实习僧
    * stream
@@ -49,7 +49,8 @@ API 服务
 * python 复写的加密使用的包为 pycryptodemo, 安装: pip install pycryptodemo 。
 * execjs 执行环境为 node.js。自行下载安装 node.js。
   注意: 安装完毕后, 使用 execjs.get().name 判断运行环境是否已成功切换为 'Node.js(V8)', 若未切换成功, 使用 os.environ["EXECJS_RUNTIME"] = "Node" 切换。
-  
+* 部分网站使用 selenium 或者 pyppeteer 登录, 安装最新版即可。 
+
 注意
 ------
 
