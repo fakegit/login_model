@@ -90,7 +90,7 @@ class IQiyiLogin:
         if result['code'] == 0:
             dfp = result['result']['dfp']
             print('dfp: {}'.format(dfp))
-            expire_time = time.strftime("%H:%M:%S", result['result']['expireAt'] - int(time.time() * 1000))
+            expire_time = time.strftime("%H:%M:%S", time.localtime(result['result']['expireAt'] - int(time.time() * 1000)))
             print('{} 后过期'.format(expire_time))
             return dfp
         return None

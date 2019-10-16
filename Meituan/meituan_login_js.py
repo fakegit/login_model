@@ -55,25 +55,6 @@ class MeituanLogin:
             return True
         return False
 
-    @staticmethod
-    def _get_fingerprint():
-        # 进入浏览器设置
-        options = Options()
-        # 设置中文
-        options.add_argument('lang=zh_CN.UTF-8')
-        options.add_argument('--headless')
-        options.add_argument(
-            'user-agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36"'
-        )
-        browser = webdriver.Chrome(options=options)
-
-        browser.get('file:///D:/Meituan/fingerprint.html')
-        time.sleep(2)
-        html = browser.page_source
-        fingerprint = re.search('</script>(.*?)</body>', html).group(1)
-        browser.quit()
-        return fingerprint
-
     def _get_token(self, url):
         ctx = execjs.compile(self.token_js)
         return ctx.call('get_token', url)
