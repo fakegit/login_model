@@ -58,8 +58,7 @@ copy出去稍微改一下, 在控制台运行一下, 果然su参数出来了, �
 然后写一个主生成函数放入控制台运行, 报错sinaSSOEncoder.rsaPubkey不是一个constructor, 这里应该是用到js原形, 不是很懂(我的js稀烂)。改了半天, 添加window对象定义, 运行结果:
 ![image](https://github.com/Esbiya/login_model/blob/master/weibo/image/22.png)
 
-好了, 至此所有的参数都出来了, 请求接口即可。完结撒花, 欢迎star, 欢迎fork!
-第一次写这么长, 主要写给js纯新手看（我自己也是一个新手哈哈）, 好累, 坚持写完了, 以后不会再写这么长了。
+好了, 至此所有的参数都出来了, 请求接口即可。
 
 公告
 ========================
