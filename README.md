@@ -27,7 +27,7 @@
    * stream
    * 淘宝
    * 今日头条
-   * 微博
+   * 微博: 分析地址: [点击这里](https://github.com/Esbiya/login_model/tree/master/weibo)
    * 喜马拉雅
    * YY 
    * 知乎
