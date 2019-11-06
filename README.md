@@ -1,4 +1,4 @@
-# 网站模拟登录
+网站模拟登录
 ===================================
 ![](https://img.shields.io/badge/Python-3.7.2-green.svg) ![](https://img.shields.io/badge/requests-2.20.0-green.svg) ![](https://img.shields.io/badge/PyExecJS-1.5.1-green.svg) ![](https://img.shields.io/badge/pycryptodemo-3.9.0-green.svg)     
 ### 
@@ -73,4 +73,4 @@ pip install -r requirements.txt
 - **超级鹰验证码服务请修改账号密码**
  
 ## :dolphin:**最后**
-> **本项目不定期更新, 如果本项目帮助到了您, 请您给个 Star, 感谢!**:cupid::cupid:
+> **已失效网站不再主动维护更新, 有需要请提issue, 如果本项目帮助到了您, 请您给个 Star, 感谢!**:cupid::cupid:
