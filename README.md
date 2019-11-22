@@ -10,7 +10,7 @@
 ****
 ### :dolphin:声明
 ### 本项目仅用于学习交流, 请遵守当地法律法规, 勿用于任何商业用途, 否则后果自负！感谢大家！
-### 如若涉及侵权，请邮件或qq联系删除! 
+### 由于某些原因, 现决定将所有的代码删除, 请已 forked 的朋友不要继续传播, 也不要用作任何非法用途, 感谢!!!
 
 ## :dolphin:运行环境
 ```
@@ -52,25 +52,13 @@ pip install -r requirements.txt
    * stream
    * 淘宝
    * 今日头条
-   * 微博: 分析地址: [点击这里](https://github.com/Esbiya/login_model/tree/master/weibo)
+   * 微博
    * 喜马拉雅
    * YY 
    * 知乎
    * 智联
    * Boss 直聘
 
-## :dolphin:API 服务
 
-* 配置
-- **在 server.py 中导入站点登录类, 并在 WEBSITE_MAP 中添加站点登录类名即可**
-
-* 运行
- ```
-    python server.py
- ```
- 
-## :dolphin:注意
-- **超级鹰验证码服务请修改账号密码**
- 
 ## :dolphin:**最后**
 > **已失效网站不再主动维护更新, 有需要请提issue, 如果本项目帮助到了您, 请您给个 Star, 感谢!**:cupid::cupid:
